@@ -3,8 +3,18 @@ import { KeyBoard, Row, Li } from "./KeyboardStyled";
 import SelectRandom from "./SelectRandom";
 import ScoreBoard from "../ScoreBoard";
 import Modal from "../EndModal";
+import { useAuth } from "../../Context/AuthContext";
+
+var today = new Date();
+var dd = String(today.getDate()).padStart(2, "0");
+var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+var yyyy = today.getFullYear();
+
+today = yyyy + "-" + mm + "-" + dd;
 
 const Keyboard = () => {
+  const { currentUser } = useAuth();
+
   const [score, setScore] = useState(0);
   const [total, setTotal] = useState(0);
   const [end, setEnd] = useState(false);
@@ -49,6 +59,18 @@ const Keyboard = () => {
   };
 
   const endGame = () => {
+    fetch("http://localhost:3001/addLeader", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: currentUser.displayName,
+        total: score,
+        datetotal: today,
+      }),
+    })
+      .then((res) => res.json())
+      .then((me) => console.log(me))
+      .catch((err) => console.log(err));
     clearInterval(myInterval.current);
     setEnd(true);
   };
